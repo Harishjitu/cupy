@@ -250,3 +250,195 @@ class TestZscore:
             x = xp.array([1, 2, 3, xp.nan], dtype=dtype)
             with pytest.raises(ValueError):
                 scp.stats.zscore(x, nan_policy='raise')
+
+
+@testing.with_requires('scipy')
+class TestMoment:
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_moment_1dim(self, xp, scp, dtype):
+        x = testing.shaped_random((100,), xp, dtype=dtype)
+        return scp.stats.moment(x, order=2)
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_moment_2dim(self, xp, scp, dtype):
+        x = testing.shaped_random((10, 20), xp, dtype=dtype)
+        return scp.stats.moment(x, order=2)
+
+    @testing.for_all_dtypes(no_bool=True, no_complex=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=1e-5, rtol=1e-5)
+    @pytest.mark.parametrize('order', [0, 1, 2, 3, 4, 5])
+    def test_moment_orders(self, xp, scp, dtype, order):
+        x = testing.shaped_random((50,), xp, dtype=dtype)
+        return scp.stats.moment(x, order=order)
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    @pytest.mark.parametrize('axis', [0, 1, None])
+    def test_moment_axis(self, xp, scp, dtype, axis):
+        x = testing.shaped_random((10, 20), xp, dtype=dtype)
+        return scp.stats.moment(x, order=2, axis=axis)
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp')
+    def test_moment_empty(self, xp, scp, dtype):
+        x = xp.array([], dtype=dtype)
+        return scp.stats.moment(x, order=2)
+
+    @testing.for_dtypes('fd')
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_moment_nan_policy_propagate(self, xp, scp, dtype):
+        x = xp.array([1.0, 2.0, xp.nan, 4.0], dtype=dtype)
+        return scp.stats.moment(x, order=2, nan_policy='propagate')
+
+    @testing.for_dtypes('fd')
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_moment_nan_policy_omit(self, xp, scp, dtype):
+        x = xp.array([1.0, 2.0, xp.nan, 4.0], dtype=dtype)
+        return scp.stats.moment(x, order=2, nan_policy='omit')
+
+    @testing.for_dtypes('fd')
+    def test_moment_nan_policy_raise(self, dtype):
+        for xp, scp in [(numpy, scipy), (cupy, cupyx.scipy)]:
+            x = xp.array([1.0, 2.0, xp.nan, 4.0], dtype=dtype)
+            with pytest.raises(ValueError):
+                scp.stats.moment(x, order=2, nan_policy='raise')
+
+
+@testing.with_requires('scipy')
+class TestSkew:
+
+    @testing.for_all_dtypes(no_bool=True, no_complex=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_skew_1dim(self, xp, scp, dtype):
+        x = testing.shaped_random((100,), xp, dtype=dtype)
+        return scp.stats.skew(x)
+
+    @testing.for_all_dtypes(no_bool=True, no_complex=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_skew_2dim(self, xp, scp, dtype):
+        x = testing.shaped_random((10, 20), xp, dtype=dtype)
+        return scp.stats.skew(x)
+
+    @testing.for_all_dtypes(no_bool=True, no_complex=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    @pytest.mark.parametrize('axis', [0, 1, None])
+    def test_skew_axis(self, xp, scp, dtype, axis):
+        x = testing.shaped_random((10, 20), xp, dtype=dtype)
+        return scp.stats.skew(x, axis=axis)
+
+    @testing.for_all_dtypes(no_bool=True, no_complex=True, no_float16=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=1e-5, rtol=1e-5)
+    @pytest.mark.parametrize('bias', [True, False])
+    def test_skew_bias(self, xp, scp, dtype, bias):
+        x = testing.shaped_random((50,), xp, dtype=dtype)
+        return scp.stats.skew(x, bias=bias)
+
+    @testing.for_all_dtypes(no_bool=True, no_complex=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp')
+    def test_skew_empty(self, xp, scp, dtype):
+        x = xp.array([], dtype=dtype)
+        return scp.stats.skew(x)
+
+    @testing.for_dtypes('fd')
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_skew_constant(self, xp, scp, dtype):
+        x = xp.array([5.0, 5.0, 5.0, 5.0], dtype=dtype)
+        return scp.stats.skew(x)
+
+    @testing.for_dtypes('fd')
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_skew_nan_policy_propagate(self, xp, scp, dtype):
+        x = xp.array([1.0, 2.0, xp.nan, 4.0], dtype=dtype)
+        return scp.stats.skew(x, nan_policy='propagate')
+
+    @testing.for_dtypes('fd')
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_skew_nan_policy_omit(self, xp, scp, dtype):
+        x = xp.array([1.0, 2.0, xp.nan, 4.0], dtype=dtype)
+        return scp.stats.skew(x, nan_policy='omit')
+
+    @testing.for_dtypes('fd')
+    def test_skew_nan_policy_raise(self, dtype):
+        for xp, scp in [(numpy, scipy), (cupy, cupyx.scipy)]:
+            x = xp.array([1.0, 2.0, xp.nan, 4.0], dtype=dtype)
+            with pytest.raises(ValueError):
+                scp.stats.skew(x, nan_policy='raise')
+
+
+@testing.with_requires('scipy')
+class TestKurtosis:
+
+    @testing.for_all_dtypes(no_bool=True, no_complex=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_kurtosis_1dim(self, xp, scp, dtype):
+        x = testing.shaped_random((100,), xp, dtype=dtype)
+        return scp.stats.kurtosis(x)
+
+    @testing.for_all_dtypes(no_bool=True, no_complex=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_kurtosis_2dim(self, xp, scp, dtype):
+        x = testing.shaped_random((10, 20), xp, dtype=dtype)
+        return scp.stats.kurtosis(x)
+
+    @testing.for_all_dtypes(no_bool=True, no_complex=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    @pytest.mark.parametrize('axis', [0, 1, None])
+    def test_kurtosis_axis(self, xp, scp, dtype, axis):
+        x = testing.shaped_random((10, 20), xp, dtype=dtype)
+        return scp.stats.kurtosis(x, axis=axis)
+
+    @testing.for_all_dtypes(no_bool=True, no_complex=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    @pytest.mark.parametrize('fisher', [True, False])
+    def test_kurtosis_fisher(self, xp, scp, dtype, fisher):
+        x = testing.shaped_random((50,), xp, dtype=dtype)
+        return scp.stats.kurtosis(x, fisher=fisher)
+
+    @testing.for_all_dtypes(no_bool=True, no_complex=True, no_float16=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    @pytest.mark.parametrize('bias', [True, False])
+    def test_kurtosis_bias(self, xp, scp, dtype, bias):
+        x = testing.shaped_random((50,), xp, dtype=dtype)
+        return scp.stats.kurtosis(x, bias=bias)
+
+    @testing.for_all_dtypes(no_bool=True, no_complex=True, no_float16=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    @pytest.mark.parametrize('fisher', [True, False])
+    @pytest.mark.parametrize('bias', [True, False])
+    def test_kurtosis_fisher_bias(self, xp, scp, dtype, fisher, bias):
+        x = testing.shaped_random((50,), xp, dtype=dtype)
+        return scp.stats.kurtosis(x, fisher=fisher, bias=bias)
+
+    @testing.for_all_dtypes(no_bool=True, no_complex=True)
+    @testing.numpy_cupy_allclose(scipy_name='scp')
+    def test_kurtosis_empty(self, xp, scp, dtype):
+        x = xp.array([], dtype=dtype)
+        return scp.stats.kurtosis(x)
+
+    @testing.for_dtypes('fd')
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_kurtosis_constant(self, xp, scp, dtype):
+        x = xp.array([5.0, 5.0, 5.0, 5.0], dtype=dtype)
+        return scp.stats.kurtosis(x)
+
+    @testing.for_dtypes('fd')
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_kurtosis_nan_policy_propagate(self, xp, scp, dtype):
+        x = xp.array([1.0, 2.0, xp.nan, 4.0], dtype=dtype)
+        return scp.stats.kurtosis(x, nan_policy='propagate')
+
+    @testing.for_dtypes('fd')
+    @testing.numpy_cupy_allclose(scipy_name='scp', atol=atol, rtol=rtol)
+    def test_kurtosis_nan_policy_omit(self, xp, scp, dtype):
+        x = xp.array([1.0, 2.0, xp.nan, 4.0], dtype=dtype)
+        return scp.stats.kurtosis(x, nan_policy='omit')
+
+    @testing.for_dtypes('fd')
+    def test_kurtosis_nan_policy_raise(self, dtype):
+        for xp, scp in [(numpy, scipy), (cupy, cupyx.scipy)]:
+            x = xp.array([1.0, 2.0, xp.nan, 4.0], dtype=dtype)
+            with pytest.raises(ValueError):
+                scp.stats.kurtosis(x, nan_policy='raise')
